@@ -301,6 +301,9 @@ impl<'a> EspHttpRequestWrite<'a> {
                 }
             }
 
+            // Patch until https://github.com/esp-rs/esp-idf-svc/issues/126 is resolved
+            esp!(unsafe { esp_http_client_close(self.client.raw) })?;
+
             break;
         }
 
