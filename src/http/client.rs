@@ -75,6 +75,15 @@ pub struct Configuration<'a> {
     pub crt_bundle_attach: Option<unsafe extern "C" fn(conf: *mut c_types::c_void) -> esp_err_t>,
 }
 
+#[allow(clippy::type_complexity)]
+pub struct EspHttpClient {
+    raw: esp_http_client_handle_t,
+    follow_redirects_policy: FollowRedirectsPolicy,
+    event_handler: Box<Option<Box<dyn Fn(&esp_http_client_event_t) -> esp_err_t>>>,
+    _client_cert_pem: Option<CString>,
+    _client_key_pem: Option<CString>
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 enum State {
     New,
@@ -385,6 +394,9 @@ impl EspHttpConnection {
                     continue;
                 }
             }
+
+            // Patch until https://github.com/esp-rs/esp-idf-svc/issues/126 is resolved
+            esp!(unsafe { esp_http_client_close(self.client.raw) })?;
 
             break;
         }
