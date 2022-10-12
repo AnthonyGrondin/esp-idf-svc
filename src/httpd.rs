@@ -395,6 +395,7 @@ impl Server {
     }
 
     /// Copied from the definition of HTTPD_DEFAULT_CONFIG() in http_server.h/https_server.h
+    #[allow(clippy::needless_update)]
     fn default_configuration(
         http_port: u16,
         https_port: u16,
@@ -420,6 +421,10 @@ impl Server {
             open_fn: None,
             close_fn: None,
             uri_match_fn: None,
+            // Latest 4.4 and master branches have options to control SO linger,
+            // but these are not released yet so we cannot (yet) support these
+            // conditionally
+            ..Default::default()
         }
     }
 }

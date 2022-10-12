@@ -35,7 +35,7 @@ impl NvsDefault {
         let mut taken = DEFAULT_TAKEN.lock();
 
         if *taken {
-            esp!(ESP_ERR_INVALID_STATE as i32)?;
+            esp!(ESP_ERR_INVALID_STATE)?;
         }
 
         let default_nvs = Self::init()?;
@@ -90,7 +90,7 @@ impl NvsCustom {
         let c_partition = CString::new(partition).unwrap();
 
         if registrations.contains(c_partition.as_ref()) {
-            return Err(EspError::from(ESP_ERR_INVALID_STATE as i32).unwrap());
+            return Err(EspError::from(ESP_ERR_INVALID_STATE).unwrap());
         }
 
         unsafe {
@@ -217,7 +217,7 @@ impl<T: NvsPartitionId> EspNvs<T> {
         // nvs_erase_key is not scoped by datatype
         let result = unsafe { nvs_erase_key(self.1, c_key.as_ptr()) };
 
-        if result == ESP_ERR_NVS_NOT_FOUND as i32 {
+        if result == ESP_ERR_NVS_NOT_FOUND {
             Ok(false)
         } else {
             esp!(result)?;
@@ -326,7 +326,7 @@ impl<T: NvsPartitionId> EspNvs<T> {
         }
     }
 
-    fn put_raw(&mut self, name: &str, buf: &[u8]) -> Result<bool, EspError> {
+    fn set_raw(&mut self, name: &str, buf: &[u8]) -> Result<bool, EspError> {
         let c_key = CString::new(name).unwrap();
         let mut u64value: u_int64_t = 0;
 
@@ -399,7 +399,7 @@ impl<T: NvsPartitionId> RawStorage for EspNvs<T> {
         EspNvs::get_raw(self, name, buf)
     }
 
-    fn put_raw(&mut self, name: &str, buf: &[u8]) -> Result<bool, Self::Error> {
-        EspNvs::put_raw(self, name, buf)
+    fn set_raw(&mut self, name: &str, buf: &[u8]) -> Result<bool, Self::Error> {
+        EspNvs::set_raw(self, name, buf)
     }
 }
